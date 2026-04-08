@@ -3,315 +3,323 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Space Quest: Universal Mobile</title>
+    <title>Deep Space: Professional Edition</title>
     <style>
         :root {
             --neon-blue: #00f3ff;
             --neon-pink: #ff00ea;
-            --engine-fire: #ffaa00;
-            --glass-bg: rgba(10, 15, 30, 0.9);
+            --engine-fire: #ff6600;
+            --space-dark: #05070a;
+            --glass: rgba(15, 20, 35, 0.95);
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 
         body, html {
             margin: 0; padding: 0;
             width: 100%; height: 100%;
-            background: #020308;
-            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: var(--space-dark);
+            font-family: 'Segoe UI', system-ui, sans-serif;
             color: white; overflow: hidden;
             touch-action: manipulation;
         }
 
-        #space-bg {
+        #stars-container {
             position: fixed; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
+            background: radial-gradient(circle at center, #16213e 0%, #05070a 100%);
             z-index: 1;
         }
 
         .star {
             position: absolute; background: white; border-radius: 50%;
-            animation: twinkle var(--t) infinite alternate ease-in-out;
+            animation: pulse var(--d) infinite alternate;
         }
-        @keyframes twinkle { 0% { opacity: 0.3; } 100% { opacity: 1; } }
+        @keyframes pulse { from { opacity: 0.2; } to { opacity: 1; } }
 
-        #universe {
-            position: relative; width: 100%; height: 100%; z-index: 3;
-            overflow: hidden;
-        }
+        #universe { position: relative; width: 100%; height: 100%; z-index: 3; }
 
         #route-svg {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 2; pointer-events: none;
+            z-index: 2; pointer-events: none; opacity: 0.4;
         }
 
-        /* СОЛНЦЕ */
+        /* СОЛНЦЕ И ОБЪЕКТЫ */
         #sun {
             position: absolute; 
-            width: 25vw; height: 25vw;
-            min-width: 120px; min-height: 120px;
-            background: radial-gradient(circle, #ffcc00, #ff6600, transparent);
-            border-radius: 50%;
-            box-shadow: 0 0 50px #ff6600;
-            z-index: 4;
+            width: 28vw; height: 28vw; min-width: 140px; min-height: 140px;
+            background: radial-gradient(circle, #ffcc00 20%, #ff6600 60%, transparent 80%);
+            border-radius: 50%; box-shadow: 0 0 60px rgba(255, 102, 0, 0.5); z-index: 4;
         }
 
-        /* ПЛАНЕТЫ - Адаптивные позиции */
         .planet {
             position: absolute; border-radius: 50%; cursor: pointer;
             transform: translate(-50%, -50%);
             display: flex; justify-content: center; align-items: center;
-            filter: grayscale(100%) brightness(0.4);
-            z-index: 5; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+            filter: grayscale(100%) brightness(0.3);
+            z-index: 5; transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         }
-
-        .planet.active { filter: grayscale(0%) brightness(1); box-shadow: 0 0 20px var(--neon-blue); }
-        .planet.completed { filter: grayscale(0%) brightness(0.5); }
+        .planet.active { filter: grayscale(0%) brightness(1); box-shadow: 0 0 30px var(--neon-blue); }
+        .planet.completed { filter: grayscale(0%) brightness(0.5); opacity: 0.6; }
 
         .planet span {
-            position: absolute; bottom: -25px; font-size: 10px;
-            text-transform: uppercase; font-weight: bold; color: var(--neon-blue);
-            white-space: nowrap; pointer-events: none;
+            position: absolute; bottom: -30px; font-size: 11px;
+            text-transform: uppercase; font-weight: 800; color: var(--neon-blue);
+            white-space: nowrap; pointer-events: none; letter-spacing: 1.5px;
+            text-shadow: 0 0 10px black;
         }
 
-        /* Настройка размеров планет через переменные для удобства */
-        #p0 { width: 10vw; height: 10vw; min-width: 40px; min-height: 40px; background: url('https://upload.wikimedia.org/wikipedia/commons/4/4a/Mercury_in_true_color.jpg') center/cover; }
-        #p1 { width: 13vw; height: 13vw; min-width: 50px; min-height: 50px; background: url('https://upload.wikimedia.org/wikipedia/commons/e/e5/Venus-real_color.jpg') center/cover; }
-        #p2 { width: 14vw; height: 14vw; min-width: 55px; min-height: 55px; background: url('https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg') center/cover; }
-        #p3 { width: 11vw; height: 11vw; min-width: 45px; min-height: 45px; background: url('https://upload.wikimedia.org/wikipedia/commons/0/02/OSIRIS_Mars_true_color.jpg') center/cover; }
-        #p4 { width: 22vw; height: 22vw; min-width: 80px; min-height: 80px; background: url('https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg') center/cover; }
-        #p5 { width: 19vw; height: 19vw; min-width: 70px; min-height: 70px; background: url('https://upload.wikimedia.org/wikipedia/commons/c/c7/Saturn_during_Equinox.jpg') center/cover; }
-        #p6 { width: 15vw; height: 15vw; min-width: 60px; min-height: 60px; background: url('https://upload.wikimedia.org/wikipedia/commons/3/3d/Uranus2.jpg') center/cover; }
+        /* Текстуры планет */
+        #p0 { width: 10vw; height: 10vw; min-width: 45px; background: url('https://upload.wikimedia.org/wikipedia/commons/4/4a/Mercury_in_true_color.jpg') center/cover; }
+        #p1 { width: 13vw; height: 13vw; min-width: 55px; background: url('https://upload.wikimedia.org/wikipedia/commons/e/e5/Venus-real_color.jpg') center/cover; }
+        #p2 { width: 14vw; height: 14vw; min-width: 65px; background: url('https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg') center/cover; }
+        #p3 { width: 11vw; height: 11vw; min-width: 50px; background: url('https://upload.wikimedia.org/wikipedia/commons/0/02/OSIRIS_Mars_true_color.jpg') center/cover; }
+        #p4 { width: 22vw; height: 22vw; min-width: 90px; background: url('https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg') center/cover; }
+        #p5 { width: 20vw; height: 20vw; min-width: 85px; background: url('https://upload.wikimedia.org/wikipedia/commons/c/c7/Saturn_during_Equinox.jpg') center/cover; }
+        #p6 { width: 16vw; height: 16vw; min-width: 70px; background: url('https://upload.wikimedia.org/wikipedia/commons/3/3d/Uranus2.jpg') center/cover; }
 
-        /* РАКЕТА */
-        #rocket-container {
-            position: absolute; width: 50px; height: 50px; z-index: 10;
-            left: 50%; top: -100px;
-            transition: all 1.5s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+        /* ДЕТАЛИЗИРОВАННАЯ РАКЕТА */
+        #rocket-wrap {
+            position: absolute; width: 60px; height: 80px; z-index: 10;
+            left: 50%; top: -150px; transform: translate(-50%, -50%);
+            transition: all 1.8s cubic-bezier(0.4, 0, 0.2, 1);
             pointer-events: none;
         }
-        #rocket-sprite { width: 100%; height: 100%; transition: transform 0.5s ease; }
-        .exhaust {
-            position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%);
-            width: 10px; height: 0; background: linear-gradient(to bottom, var(--engine-fire), transparent);
-            border-radius: 50%; opacity: 0; transition: 0.2s;
+        #rocket-sprite { width: 100%; height: 100%; transition: transform 0.5s ease; filter: drop-shadow(0 0 5px var(--neon-blue)); }
+        
+        .fire {
+            position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%);
+            width: 14px; height: 0; background: linear-gradient(to bottom, #fff, #ffaa00, transparent);
+            border-radius: 50%; opacity: 0; transition: 0.3s;
         }
-        .moving .exhaust { opacity: 1; height: 30px; animation: flicker 0.1s infinite alternate; }
-        @keyframes flicker { from { height: 25px; } to { height: 35px; } }
+        .moving .fire { opacity: 1; height: 40px; animation: flame 0.1s infinite alternate; }
+        @keyframes flame { from { height: 35px; scale: 0.9; } to { height: 45px; scale: 1.1; } }
 
         /* ИНТЕРФЕЙС */
-        .glass-panel {
+        .panel {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: var(--glass-bg); backdrop-filter: blur(15px);
-            border: 1px solid var(--neon-blue); border-radius: 15px;
-            padding: 25px; width: 85%; max-width: 400px; text-align: center;
-            z-index: 100; display: none; box-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
+            background: var(--glass); backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 243, 255, 0.3); border-radius: 24px;
+            padding: 30px; width: 90%; max-width: 400px; text-align: center;
+            z-index: 100; display: none; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
         }
-        .glass-panel.show { display: block; }
+        .panel.show { display: block; animation: appear 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        @keyframes appear { from { opacity: 0; transform: translate(-50%, -40%) scale(0.9); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+
         .btn {
-            background: rgba(0, 243, 255, 0.1); color: white; border: 1px solid var(--neon-blue);
-            padding: 12px; margin: 8px 0; border-radius: 8px; width: 100%; font-weight: bold;
-            cursor: pointer; text-transform: uppercase; font-size: 14px;
+            background: rgba(255, 255, 255, 0.05); color: white; border: 1px solid var(--neon-blue);
+            padding: 16px; margin: 8px 0; border-radius: 12px; width: 100%; font-weight: bold;
+            cursor: pointer; text-transform: uppercase; font-size: 13px; transition: 0.3s;
+            letter-spacing: 1px;
         }
+        .btn:hover { background: var(--neon-blue); color: black; }
+        .btn.wrong { border-color: #ff0055; color: #ff0055; background: rgba(255, 0, 85, 0.1); }
 
         /* МИНИ-ИГРА */
-        #minigame { display: none; position: fixed; inset: 0; z-index: 200; background: #000; }
-        .alien { position: absolute; font-size: 40px; touch-action: none; }
+        #battle-zone { display: none; position: fixed; inset: 0; z-index: 200; background: #000; }
+        .target { position: absolute; font-size: 50px; cursor: pointer; touch-action: none; filter: drop-shadow(0 0 10px var(--neon-pink)); }
 
-        /* МОБИЛЬНАЯ И ДЕСКТОПНАЯ ЛОГИКА (Медиа-запросы) */
+        /* Адаптивные сетки */
         @media (orientation: landscape) {
             #sun { left: -10%; top: 50%; transform: translateY(-50%); }
-            #p0 { left: 15%; top: 30%; } #p1 { left: 25%; top: 70%; }
-            #p2 { left: 38%; top: 35%; } #p3 { left: 50%; top: 75%; }
-            #p4 { left: 65%; top: 40%; } #p5 { left: 82%; top: 70%; }
-            #p6 { left: 93%; top: 35%; }
+            #p0 { left: 15%; top: 30%; } #p1 { left: 26%; top: 72%; }
+            #p2 { left: 40%; top: 35%; } #p3 { left: 55%; top: 78%; }
+            #p4 { left: 70%; top: 40%; } #p5 { left: 85%; top: 72%; }
+            #p6 { left: 95%; top: 35%; }
         }
-
         @media (orientation: portrait) {
             #sun { left: 50%; top: -5%; transform: translateX(-50%); }
             #p0 { left: 30%; top: 15%; } #p1 { left: 70%; top: 25%; }
-            #p2 { left: 25%; top: 38%; } #p3 { left: 75%; top: 52%; }
-            #p4 { left: 35%; top: 68%; } #p5 { left: 65%; top: 82%; }
-            #p6 { left: 50%; top: 93%; }
+            #p2 { left: 25%; top: 40%; } #p3 { left: 75%; top: 55%; }
+            #p4 { left: 35%; top: 72%; } #p5 { left: 65%; top: 86%; }
+            #p6 { left: 50%; top: 94%; }
         }
     </style>
 </head>
 <body>
 
-    <div id="space-bg"></div>
-    <svg id="route-svg"><polyline id="route-line" fill="none" stroke="rgba(0, 243, 255, 0.2)" stroke-width="2" stroke-dasharray="10,5"/></svg>
+    <div id="stars-container"></div>
+    <svg id="route-svg"><polyline id="route-line" fill="none" stroke="var(--neon-blue)" stroke-width="1" stroke-dasharray="8,8"/></svg>
 
     <div id="universe">
         <div id="sun"></div>
-        <div class="planet" id="p0" onclick="handleAction(0)"><span>Меркурий</span></div>
-        <div class="planet" id="p1" onclick="handleAction(1)"><span>Венера</span></div>
-        <div class="planet" id="p2" onclick="handleAction(2)"><span>Земля</span></div>
-        <div class="planet" id="p3" onclick="handleAction(3)"><span>Марс</span></div>
-        <div class="planet" id="p4" onclick="handleAction(4)"><span>Юпитер</span></div>
-        <div class="planet" id="p5" onclick="handleAction(5)"><span>Сатурн</span></div>
-        <div class="planet" id="p6" onclick="handleAction(6)"><span>Нептун</span></div>
+        <div class="planet" id="p0" onclick="handlePlanet(0)"><span>Меркурий</span></div>
+        <div class="planet" id="p1" onclick="handlePlanet(1)"><span>Венера</span></div>
+        <div class="planet" id="p2" onclick="handlePlanet(2)"><span>Земля</span></div>
+        <div class="planet" id="p3" onclick="handlePlanet(3)"><span>Марс</span></div>
+        <div class="planet" id="p4" onclick="handlePlanet(4)"><span>Юпитер</span></div>
+        <div class="planet" id="p5" onclick="handlePlanet(5)"><span>Сатурн</span></div>
+        <div class="planet" id="p6" onclick="handlePlanet(6)"><span>Уран</span></div>
 
-        <div id="rocket-container">
+        <div id="rocket-wrap">
             <div id="rocket-sprite">
                 <svg viewBox="0 0 50 80">
-                    <path d="M25 0 C10 20 10 50 10 60 L40 60 C40 50 40 20 25 0" fill="white" />
-                    <circle cx="25" cy="30" r="5" fill="var(--neon-blue)" />
-                    <path d="M10 55 L0 75 L15 65 Z" fill="var(--neon-pink)" />
-                    <path d="M40 55 L50 75 L35 65 Z" fill="var(--neon-pink)" />
+                    <path d="M10 50 L0 75 L15 65 Z" fill="#333" />
+                    <path d="M40 50 L50 75 L35 65 Z" fill="#333" />
+                    <path d="M25 0 C12 20 10 55 10 65 L40 65 C40 55 38 20 25 0" fill="#e0e0e0" stroke="#fff" stroke-width="1" />
+                    <circle cx="25" cy="30" r="6" fill="#00f3ff" stroke="#000" stroke-width="2" />
+                    <rect x="18" y="65" width="14" height="5" fill="#ff0055" />
                 </svg>
-                <div class="exhaust"></div>
+                <div class="fire"></div>
             </div>
         </div>
     </div>
 
-    <div id="ui-start" class="glass-panel show">
-        <h2>🚀 Space Explorer</h2>
-        <p>Нажми на старт, чтобы ракета прибыла на базу!</p>
-        <button class="btn" onclick="initGame()">Полетели!</button>
+    <div id="ui-welcome" class="panel show">
+        <h2 style="color:var(--neon-blue); margin:0">DEEP SPACE</h2>
+        <p style="opacity:0.7">Экспедиция готова. Исследуйте аномалии системы, отвечая на вопросы бортового ИИ.</p>
+        <button class="btn" onclick="startAdventure()">Запуск двигателей</button>
     </div>
 
-    <div id="ui-quiz" class="glass-panel">
-        <h3 id="q-name" style="color:var(--neon-blue); margin:0"></h3>
-        <p id="q-text" style="font-size:15px"></p>
-        <div id="q-options"></div>
-        <div id="q-fact" style="display:none">
-            <p id="fact-txt" style="color:#ffcc00; font-size:13px; border-top:1px solid #333; padding-top:10px"></p>
-            <button class="btn" onclick="closeQuiz()">Дальше 🚀</button>
+    <div id="ui-quiz" class="panel">
+        <h3 id="planet-name" style="margin-top:0; color:var(--neon-blue)"></h3>
+        <p id="question-text" style="font-size:15px; line-height:1.5"></p>
+        <div id="options-box"></div>
+        <div id="fact-box" style="display:none; border-top:1px solid #333; margin-top:15px; padding-top:15px">
+            <p id="fact-text" style="color:#ffcc00; font-size:13px; font-style:italic"></p>
+            <button class="btn" onclick="nextPlanet()">Продолжить полет 🚀</button>
         </div>
     </div>
 
-    <div id="minigame">
-        <div style="position:absolute; top:10px; left:10px; color:var(--neon-blue); font-weight:bold; z-index:10">
-            Сбито: <span id="score">0</span> | Время: <span id="timer">20</span>
+    <div id="battle-zone">
+        <div style="position:absolute; top:20px; width:100%; text-align:center; color:var(--neon-blue); font-weight:bold; font-size:20px;">
+            УГРОЗА: <span id="score">0</span>/12 | ТОПЛИВО: <span id="timer">20</span>
         </div>
     </div>
 
     <script>
-        const planetsData = [
-            { id: 'p0', name: 'Меркурий', q: 'Ближайшая к Солнцу планета?', opts: ['Меркурий', 'Марс'], ans: 0, f: 'Год на Меркурии длится всего 88 дней!' },
-            { id: 'p1', name: 'Венера', q: 'Самая горячая планета?', opts: ['Земля', 'Венера'], ans: 1, f: 'Тут жарче, чем в духовке — целых 460°C!' },
-            { id: 'p2', name: 'Земля', q: 'На какой планете мы живем?', opts: ['Земля', 'Юпитер'], ans: 0, f: 'Земля — единственное место с жидкой водой на поверхности.' },
-            { id: 'p3', name: 'Марс', q: 'Какого цвета эта планета?', opts: ['Зеленая', 'Красная'], ans: 1, f: 'На Марсе самая высокая гора в Солнечной системе — Олимп.' },
-            { id: 'p4', name: 'Юпитер', q: 'Самая большая планета?', opts: ['Юпитер', 'Нептун'], ans: 0, f: 'Юпитер в 318 раз тяжелее Земли!' },
-            { id: 'p5', name: 'Сатурн', q: 'Что есть у Сатурна?', opts: ['Кольца', 'Уши'], ans: 0, f: 'Его кольца состоят в основном из льда и пыли.' },
-            { id: 'p6', name: 'Нептун', q: 'Самая дальняя планета?', opts: ['Венера', 'Нептун'], ans: 1, f: 'Один год на Нептуне длится 165 земных лет!' }
+        const planets = [
+            { id: 'p0', name: 'Меркурий', q: 'Почему на Меркурии происходят самые резкие перепады температур?', opts: ['Из-за близости к Солнцу', 'Из-за отсутствия атмосферы', 'Из-за высокой плотности'], ans: 1, f: 'Там нет воздуха, который бы удержал тепло — на солнечной стороне +430°C, а на ночной -180°C.' },
+            { id: 'p1', name: 'Венера', q: 'В каком направлении вращается Венера вокруг своей оси?', opts: ['Как и Земля', 'В обратном (ретроградном)', 'Она не вращается'], ans: 1, f: 'Венера вращается по часовой стрелке. Солнце там встает на западе!' },
+            { id: 'p2', name: 'Земля', q: 'Какая часть внутреннего строения Земли создает её магнитное поле?', opts: ['Земная кора', 'Мантия', 'Внешнее жидкое ядро'], ans: 2, f: 'Движение жидкого железа в ядре создает гигантский электромагнит, защищающий нас от радиации.' },
+            { id: 'p3', name: 'Марс', q: 'Как называется самый высокий вулкан на Марсе?', opts: ['Гора Эребус', 'Олимп', 'Кратер Гейла'], ans: 1, f: 'Олимп в три раза выше Эвереста — его высота целых 26 километров!' },
+            { id: 'p4', name: 'Юпитер', q: 'Что такое Большое красное пятно Юпитера?', opts: ['Гигантский вулкан', 'Антициклонный шторм', 'Озеро метана'], ans: 1, f: 'Этот шторм бушует уже более 300 лет и в него легко поместится целая Земля.' },
+            { id: 'p5', name: 'Сатурн', q: 'Из чего преимущественно состоят кольца Сатурна?', opts: ['Из газов', 'Из водяного льда и пыли', 'Из застывшей лавы'], ans: 1, f: 'Кольца почти полностью состоят из льда. Несмотря на ширину, их толщина всего около 10-100 метров.' },
+            { id: 'p6', name: 'Уран', q: 'Какая главная особенность вращения Урана?', opts: ['Самое быстрое в системе', 'Вращается "лежа на боку"', 'Вращается рывками'], ans: 1, f: 'Уран наклонен на 98 градусов. Он буквально катится по своей орбите как шар.' }
         ];
 
-        let currentIdx = 0;
-        const rocket = document.getElementById('rocket-container');
+        let step = 0;
+        const rocket = document.getElementById('rocket-wrap');
         const sprite = document.getElementById('rocket-sprite');
 
-        // Звезды
-        for(let i=0; i<80; i++) {
+        // Генерация звезд
+        for(let i=0; i<100; i++) {
             let s = document.createElement('div');
             s.className = 'star';
             s.style.left = Math.random()*100+'%'; s.style.top = Math.random()*100+'%';
-            s.style.width = s.style.height = Math.random()*2+'px';
-            s.style.setProperty('--t', (1+Math.random()*3)+'s');
-            document.getElementById('space-bg').appendChild(s);
+            s.style.width = s.style.height = Math.random()*3+'px';
+            s.style.setProperty('--d', (1+Math.random()*4)+'s');
+            document.getElementById('stars-container').appendChild(s);
         }
 
-        function drawRoute() {
+        function updatePath() {
             const line = document.getElementById('route-line');
             const sun = document.getElementById('sun');
             let pts = `${sun.offsetLeft + sun.offsetWidth/2},${sun.offsetTop + sun.offsetHeight/2} `;
-            planetsData.forEach(p => {
+            planets.forEach(p => {
                 const el = document.getElementById(p.id);
                 pts += `${el.offsetLeft},${el.offsetTop} `;
             });
             line.setAttribute('points', pts);
         }
-        window.onresize = drawRoute;
+        window.addEventListener('resize', updatePath);
 
-        function fly(targetId, cb) {
-            const target = document.getElementById(targetId);
-            const rect = target.getBoundingClientRect();
+        function flyTo(id, cb) {
+            const target = document.getElementById(id);
+            const tRect = target.getBoundingClientRect();
             const rRect = rocket.getBoundingClientRect();
             
-            const dx = (rect.left + rect.width/2) - (rRect.left + rRect.width/2);
-            const dy = (rect.top + rect.height/2) - (rRect.top + rRect.height/2);
+            const dx = (tRect.left + tRect.width/2) - (rRect.left + rRect.width/2);
+            const dy = (tRect.top + tRect.height/2) - (rRect.top + rRect.height/2);
             const angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
 
             sprite.style.transform = `rotate(${angle}deg)`;
             
             setTimeout(() => {
                 rocket.classList.add('moving');
-                rocket.style.left = (rect.left + rect.width/2) + 'px';
-                rocket.style.top = (rect.top + rect.height/2) + 'px';
+                rocket.style.left = (tRect.left + tRect.width/2) + 'px';
+                rocket.style.top = (tRect.top + tRect.height/2) + 'px';
                 setTimeout(() => {
                     rocket.classList.remove('moving');
                     if(cb) cb();
-                }, 1500);
-            }, 100);
+                }, 1800);
+            }, 200);
         }
 
-        function initGame() {
-            document.getElementById('ui-start').classList.remove('show');
-            drawRoute();
-            fly('sun', () => { document.getElementById('p0').classList.add('active'); });
+        function startAdventure() {
+            document.getElementById('ui-welcome').classList.remove('show');
+            updatePath();
+            flyTo('sun', () => { document.getElementById('p0').classList.add('active'); });
         }
 
-        function handleAction(i) {
-            if(i !== currentIdx) return;
-            fly(planetsData[i].id, () => {
-                const data = planetsData[i];
-                document.getElementById('q-name').innerText = data.name;
-                document.getElementById('q-text').innerText = data.q;
-                const opts = document.getElementById('q-options');
-                opts.innerHTML = '';
-                document.getElementById('q-fact').style.display = 'none';
+        function handlePlanet(i) {
+            if(i !== step) return;
+            flyTo(planets[i].id, () => {
+                const data = planets[i];
+                document.getElementById('planet-name').innerText = data.name;
+                document.getElementById('question-text').innerText = data.q;
+                const box = document.getElementById('options-box');
+                box.innerHTML = '';
+                document.getElementById('fact-box').style.display = 'none';
 
-                data.opts.forEach((o, idx) => {
+                data.opts.forEach((text, idx) => {
                     const b = document.createElement('button');
-                    b.className = 'btn'; b.innerText = o;
+                    b.className = 'btn'; b.innerText = text;
                     b.onclick = () => {
                         if(idx === data.ans) {
-                            opts.innerHTML = '✅ Верно!';
-                            document.getElementById('fact-txt').innerText = data.f;
-                            document.getElementById('q-fact').style.display = 'block';
+                            box.innerHTML = '<h3 style="color:#00ff88">АНАЛИЗ ЗАВЕРШЕН ✅</h3>';
+                            document.getElementById('fact-text').innerText = "ИНФО: " + data.f;
+                            document.getElementById('fact-box').style.display = 'block';
                         } else {
-                            b.style.borderColor = 'red';
+                            b.classList.add('wrong');
+                            b.innerText = "ОШИБКА ДАННЫХ";
                         }
                     }
-                    opts.appendChild(b);
+                    box.appendChild(b);
                 });
                 document.getElementById('ui-quiz').classList.add('show');
             });
         }
 
-        function closeQuiz() {
+        function nextPlanet() {
             document.getElementById('ui-quiz').classList.remove('show');
-            document.getElementById(`p${currentIdx}`).classList.replace('active', 'completed');
-            currentIdx++;
-            if(currentIdx < planetsData.length) {
-                document.getElementById(`p${currentIdx}`).classList.add('active');
+            document.getElementById(`p${step}`).classList.replace('active', 'completed');
+            step++;
+            if(step < planets.length) {
+                document.getElementById(`p${step}`).classList.add('active');
             } else {
-                startMinigame();
+                startFinalBattle();
             }
         }
 
-        // МИНИ-ИГРА (Адаптивная)
+        // Финальная игра
         let score = 0, time = 20;
-        function startMinigame() {
-            document.getElementById('minigame').style.display = 'block';
-            const itv = setInterval(() => {
+        function startFinalBattle() {
+            document.getElementById('battle-zone').style.display = 'block';
+            const timer = setInterval(() => {
                 time--; document.getElementById('timer').innerText = time;
-                if(time <= 0) { clearInterval(itv); clearInterval(spw); alert('Конец! Очки: ' + score); window.location.href="index2.html"; }
+                if(time <= 0) {
+                    clearInterval(timer); clearInterval(spawner);
+                    alert(score >= 12 ? 'МИССИЯ ВЫПОЛНЕНА! СИСТЕМА ИЗУЧЕНА.' : 'КРИТИЧЕСКИЙ УРОН! ДАННЫЕ УТЕРЯНЫ.');
+                    window.location.href="index2.html";
+                }
             }, 1000);
-            const spw = setInterval(() => {
-                const a = document.createElement('div');
-                a.className = 'alien'; a.innerText = '👾';
-                a.style.left = Math.random()*80+10+'%'; a.style.top = '-50px';
-                document.getElementById('minigame').appendChild(a);
-                let y = -50;
-                const f = setInterval(() => {
-                    y += 4; a.style.top = y+'px';
-                    if(y > window.innerHeight) { clearInterval(f); a.remove(); }
+
+            const spawner = setInterval(() => {
+                const t = document.createElement('div');
+                t.className = 'target'; t.innerText = '☄️';
+                t.style.left = Math.random()*80+10+'%'; t.style.top = '-60px';
+                document.getElementById('battle-zone').appendChild(t);
+                
+                let y = -60;
+                const fall = setInterval(() => {
+                    y += 5; t.style.top = y+'px';
+                    if(y > window.innerHeight) { clearInterval(fall); t.remove(); }
                 }, 20);
-                const hit = () => { score++; document.getElementById('score').innerText = score; a.innerText='💥'; clearInterval(f); setTimeout(()=>a.remove(),100); };
-                a.addEventListener('mousedown', hit);
-                a.addEventListener('touchstart', (e) => { e.preventDefault(); hit(); });
-            }, 700);
+
+                const hit = () => { score++; document.getElementById('score').innerText = score; t.innerText='💥'; clearInterval(fall); setTimeout(()=>t.remove(),150); };
+                t.addEventListener('mousedown', hit);
+                t.addEventListener('touchstart', (e) => { e.preventDefault(); hit(); });
+            }, 600);
         }
     </script>
 </body>
